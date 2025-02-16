@@ -46,11 +46,11 @@ In order to properly install the game, you'll have to follow these steps precise
 
 - It is suggested to transcode the video with Handbrake: https://handbrake.fr/
 - Import `ux0:data/spiderman/gameloft/games/spiderman/logo.mp4` into Handbrake.
-    Set 'Preset:' to Fast 480p30
-    Under 'Summary' tab set 'Format' to MP4
-    Under 'Video' tab, set 'Framerate' to 30 and Constant Framerate
-    In 'Save As' field, set file extension to .mp4
-    Click 'Start Encode' to proceed
+- Set 'Preset:' to Fast 480p30
+- Under 'Summary' tab set 'Format' to MP4
+- Under 'Video' tab, set 'Framerate' to 30 and Constant Framerate
+- In 'Save As' field, set file extension to .mp4
+- Click 'Start Encode' to proceed
 - Replace the original file with the newly transcoded one.
 
 ## Build Instructions (For Developers)
