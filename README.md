@@ -9,6 +9,14 @@ By doing so, it's basically as if we emulate a minimalist Android environment in
 
 ## Changelog
 
+### v1.1
+
+- Fixed wrong mapping for SELECT and START that were swapped.
+- Improved input code logic.
+- Improved audio code logic.
+- Untied framerate (now game logic will run at 60 FPS instead of 30).
+- Disabled debug mode in the video player.
+
 ### v1.0
 
 - Initial release.
