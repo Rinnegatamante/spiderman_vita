@@ -235,6 +235,10 @@ void patch_game(void) {
 		hook_addr(so_symbol(&spiderman_mod, "_ZN6UIInfo12EnlargeRateXEi"), (uintptr_t)&EnlargeRateX);
 		hook_addr(so_symbol(&spiderman_mod, "_ZN6UIInfo12EnlargeRateYEi"), (uintptr_t)&EnlargeRateY);
 		hook_addr(so_symbol(&spiderman_mod, "nativeMyReloadSound_Common"), (uintptr_t)&ret1);
+		
+		// Unlock framerate
+		float v = 16.666;
+		kuKernelCpuUnrestrictedMemcpy((void *)(spiderman_mod.text_base + 0x3CCAD0), &v, 4);
 	}
 }
 
