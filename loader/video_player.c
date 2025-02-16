@@ -162,7 +162,7 @@ void video_open(const char *path) {
 	playerInit.basePriority = 0xA0;
 	playerInit.numOutputVideoFrameBuffers = 5;
 	playerInit.autoStart = GL_TRUE;
-#if 1
+#if 0
 	playerInit.debugLevel = 3;
 #endif
 
