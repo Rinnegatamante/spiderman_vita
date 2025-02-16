@@ -71,7 +71,7 @@ void audio_player_instance(void *m, uint8_t loop, float vol) {
 
 int audio_player_is_playing(void *m) {
 	audio_instance *mus = (audio_instance *)m;
-	return !soloud.getPause(mus->handle);
+	return (soloud.isValidVoiceHandle(mus->handle) && !soloud.getPause(mus->handle));
 }
 
 void audio_player_stop(void *m) {
