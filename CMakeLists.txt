@@ -29,6 +29,17 @@ add_executable(SPIDERMAN
 target_link_libraries(SPIDERMAN
   -Wl,--whole-archive pthread -Wl,--no-whole-archive
   soloud_static
+  SDL2_mixer_ext
+  SDL2
+  vorbisfile
+  vorbis
+  ogg
+  mpg123
+  opusfile
+  opus
+  modplug
+  mikmod
+  FLAC
   stdc++
   openal
   vitaGL
@@ -38,6 +49,9 @@ target_link_libraries(SPIDERMAN
   mathneon
   taihen_stub
   kubridge_stub
+  SceHid_stub
+  SceMotion_stub
+  SceIme_stub
   SceAvPlayer_stub
   SceAppMgr_stub
   SceAudio_stub

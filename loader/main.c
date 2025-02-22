@@ -96,15 +96,17 @@ void audio_player_change_sfx_volume(float vol);
 #define AUDIO_SOURCES_NUM (2048)
 float volumes[2];
 void *audio_sources[AUDIO_SOURCES_NUM] = {};
+uint8_t audio_is_bgm[AUDIO_SOURCES_NUM] = {};
 char audio_path[256];
 
 void nativePlaySound(int id, float vol, int loop) {
-	//sceClibPrintf("nativeSound %s %f %d\n", sounds[id], vol, loop);
+	//sceClibPrintf("nativePlaySound %s %f %d\n", sounds[id], vol, loop);
 	char path[256];
 	sprintf(path, "%s/%s", audio_path, sounds[id]);
 
 	if (audio_sources[id] == 0xDEADBEEF) {
 		audio_sources[id] = audio_player_play(path, loop, vol);
+		audio_is_bgm[id] = loop;
 	} else {
 		audio_player_instance(audio_sources[id], loop, vol);
 	}
@@ -112,10 +114,19 @@ void nativePlaySound(int id, float vol, int loop) {
 
 void nativeStopAllSounds() {
 	//sceClibPrintf("nativeStopAllSounds\n");
+#if 0
 	audio_player_stop_all_sounds();
 	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
 		audio_sources[i] = 0xDEADBEEF;
 	}
+#else
+	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
+		if (audio_sources[i] != 0xDEADBEEF) {
+			audio_player_stop(audio_sources[i]);
+			audio_sources[i] = 0xDEADBEEF;
+		}
+	}
+#endif
 }
 
 void nativePauseAllSounds() {
@@ -172,7 +183,15 @@ float nativeGetGroupVolume(int group_id) {
 void nativeSetGroupVolume(int group_id, float vol) {
 	//sceClibPrintf("nativeSetGroupVolume %d %f\n", group_id, vol);
 	if (group_id == 1) {
+#if 0
 		audio_player_change_bgm_volume(vol);
+#else
+	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
+		if (audio_sources[i] != 0xDEADBEEF && audio_is_bgm[i]) {
+			audio_player_set_volume(audio_sources[i], vol);
+		}
+	}
+#endif
 	} else {
 		audio_player_change_sfx_volume(vol);
 	}
@@ -301,11 +320,6 @@ static int __stack_chk_guard_fake = 0x42424242;
 
 static FILE __sF_fake[0x100][3];
 
-void glEnable_hook(GLenum v) {
-	if (v != GL_LIGHTING)
-		glEnable(v);
-}
-
 void glViewport_hook(GLint x, GLint y, GLsizei width, GLsizei height) {
 	//sceClibPrintf("glViewport %d %d %d %d\n", x, y, width, height);
 	glViewport(x + 1, y + 1, width - 1, height - 1);
@@ -417,7 +431,7 @@ static so_default_dynlib default_dynlib[] = {
 	{ "glDisableClientState", (uintptr_t)&glDisableClientState },
 	{ "glDrawArrays", (uintptr_t)&glDrawArrays },
 	{ "glDrawElements", (uintptr_t)&glDrawElements },
-	{ "glEnable", (uintptr_t)&glEnable_hook },
+	{ "glEnable", (uintptr_t)&glEnable },
 	{ "glEnableClientState", (uintptr_t)&glEnableClientState },
 	{ "glFogf", (uintptr_t)&glFogf },
 	{ "glFogfv", (uintptr_t)&glFogfv },
