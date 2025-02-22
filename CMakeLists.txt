@@ -77,6 +77,8 @@ vita_create_vpk(spiderman.vpk ${VITA_TITLEID} eboot.bin
        ${CMAKE_SOURCE_DIR}/livearea/bg0.png sce_sys/livearea/contents/bg0.png
        ${CMAKE_SOURCE_DIR}/livearea/startup.png sce_sys/livearea/contents/startup.png
        ${CMAKE_SOURCE_DIR}/livearea/template.xml sce_sys/livearea/contents/template.xml
+       ${CMAKE_SOURCE_DIR}/splash.png splash.png
+       ${CMAKE_SOURCE_DIR}/splash2.png splash2.png
 )
 
 add_custom_target(copy
