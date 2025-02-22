@@ -57,11 +57,12 @@ void audio_player_set_volume(void *m, float vol) {
 #endif
 }
 
-void *audio_player_play(char *path, uint8_t loop, float vol) {
+void *audio_player_play(char *path, uint8_t loop, float vol, uint8_t no_autostart) {
 #ifdef USE_SDL_MIXER_EXT
 	Mix_Music *ret = Mix_LoadMUS(path);
 	Mix_VolumeMusicStream(ret, (int)(128.0f * vol));
-	Mix_PlayMusicStream(ret, loop ? -1 : 0);
+	if (!no_autostart)
+		Mix_PlayMusicStream(ret, loop ? -1 : 0);
 	return (void *)ret;
 #else
 	if (loop) {
@@ -70,7 +71,8 @@ void *audio_player_play(char *path, uint8_t loop, float vol) {
 		bgm.valid = true;
 		bgm.source = (void *)ret;
 		Mix_VolumeMusic((int)(128.0f * vol));
-		Mix_PlayMusic(ret, -1);
+		if (!no_autostart)
+			Mix_PlayMusic(ret, -1);
 		return &bgm;
 	} else {
 		//sceClibPrintf("Loading %s in sound slot %d\n", path, curr_snd);
@@ -84,7 +86,8 @@ void *audio_player_play(char *path, uint8_t loop, float vol) {
 		Mix_Chunk *_snd = Mix_LoadWAV_RW(SDL_RWFromMem(snd[curr_snd].buffer, sz), 1);
 		snd[curr_snd].source = (void *)_snd;
 		Mix_VolumeChunk(_snd, (int)(128.0f * vol));
-		snd[curr_snd].handle = Mix_PlayChannel(-1, _snd, 0);
+		if (!no_autostart)
+			snd[curr_snd].handle = Mix_PlayChannel(-1, _snd, 0);
 		void *r = (void *)&snd[curr_snd];
 		curr_snd = (curr_snd + 1) % MAX_SOUNDS_NUM;
 		return r;
@@ -100,10 +103,12 @@ void audio_player_instance(void *m, uint8_t loop, float vol) {
 	} else {
 		mus->handle = Mix_PlayChannel(-1, (Mix_Chunk *)mus->source, 0);
 	}
-	audio_player_set_volume(m, vol);
+	if (vol < 2.0f)
+		audio_player_set_volume(m, vol);
 #else
 	Mix_Music *mus = (Mix_Music *)m;
-	Mix_VolumeMusicStream(mus, (int)(128.0f * vol));
+	if (vol < 2.0f)
+		Mix_VolumeMusicStream(mus, (int)(128.0f * vol));
 	Mix_PlayMusicStream(mus, loop ? -1 : 0);
 #endif
 }
@@ -219,7 +224,7 @@ void audio_player_set_volume(void *m, float vol) {
 	soloud.setVolume(mus->handle, vol);
 }
 
-void *audio_player_play(char *path, uint8_t loop, float vol) {
+void *audio_player_play(char *path, uint8_t loop, float vol, uint8_t no_autostart) {
 	if (loop) {
 		//sceClibPrintf("Loading %s in music slot %d\n", path, curr_snd_loop);
 		snd_loop[curr_snd_loop].valid = true;
@@ -227,7 +232,8 @@ void *audio_player_play(char *path, uint8_t loop, float vol) {
 		snd_loop[curr_snd_loop].source.setVolume(vol);
 		snd_loop[curr_snd_loop].source.setLooping(true);
 		snd_loop[curr_snd_loop].source.setSingleInstance(true);
-		snd_loop[curr_snd_loop].handle = soloud.playBackground(snd_loop[curr_snd_loop].source);
+		if (!no_autostart)
+			snd_loop[curr_snd_loop].handle = soloud.playBackground(snd_loop[curr_snd_loop].source);
 		void *r = (void *)&snd_loop[curr_snd_loop];
 		curr_snd_loop = (curr_snd_loop + 1) % MAX_MUSICS_NUM;
 		return r;
@@ -252,7 +258,8 @@ void audio_player_instance(void *m, uint8_t loop, float vol) {
 	} else {
 		mus->handle = soloud.play(mus->source);
 	}
-	audio_player_set_volume(m, vol);
+	if (vol < 2.0f)
+		audio_player_set_volume(m, vol);
 }
 
 int audio_player_is_playing(void *m) {

@@ -81,7 +81,7 @@ int GetHeightOfScreen() {
 	return SCREEN_H;
 }
 
-uint32_t audio_player_play(char *path, uint8_t loop, float vol);
+uint32_t audio_player_play(char *path, uint8_t loop, float vol, uint8_t no_autostart);
 int audio_player_is_playing(void *m);
 void audio_player_stop(void *m);
 void audio_player_set_pause(void *m, int val);
@@ -104,8 +104,8 @@ void nativePlaySound(int id, float vol, int loop) {
 	char path[256];
 	sprintf(path, "%s/%s", audio_path, sounds[id]);
 
-	if (audio_sources[id] == 0xDEADBEEF) {
-		audio_sources[id] = audio_player_play(path, loop, vol);
+	if (audio_sources[id] == (void *)0xDEADBEEF) {
+		audio_sources[id] = audio_player_play(path, loop, vol, 0);
 		audio_is_bgm[id] = loop;
 	} else {
 		audio_player_instance(audio_sources[id], loop, vol);
@@ -117,13 +117,13 @@ void nativeStopAllSounds() {
 #if 0
 	audio_player_stop_all_sounds();
 	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
-		audio_sources[i] = 0xDEADBEEF;
+		audio_sources[i] = (void *)0xDEADBEEF;
 	}
 #else
 	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
-		if (audio_sources[i] != 0xDEADBEEF) {
+		if (audio_sources[i] != (void *)0xDEADBEEF) {
 			audio_player_stop(audio_sources[i]);
-			audio_sources[i] = 0xDEADBEEF;
+			audio_sources[i] = (void *)0xDEADBEEF;
 		}
 	}
 #endif
@@ -141,36 +141,36 @@ void nativeResumeAllSounds() {
 
 int nativeIsMediaPlaying(int id) {
 	//sceClibPrintf("nativeIsMediaPlaying %s\n", sounds[id]);
-	if (audio_sources[id] == 0xDEADBEEF)
+	if (audio_sources[id] == (void *)0xDEADBEEF)
 		return 0;
 	return audio_player_is_playing(audio_sources[id]);
 }
 
 void nativeKillSound(int id) {
 	//sceClibPrintf("nativeKill/StopSound %s\n", sounds[id]);
-	if (audio_sources[id] != 0xDEADBEEF) {
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
 		audio_player_stop(audio_sources[id]);
-		audio_sources[id] = 0xDEADBEEF;
+		audio_sources[id] = (void *)0xDEADBEEF;
 	}
 }
 
 void nativePauseSound(int id) {
 	//sceClibPrintf("nativePauseSound %s\n", sounds[id]);
-	if (audio_sources[id] != 0xDEADBEEF) {
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
 		audio_player_set_pause(audio_sources[id], 1);
 	}
 }
 
 void nativeResumeSound(int id) {
 	//sceClibPrintf("nativeResumeSound %s\n", sounds[id]);
-	if (audio_sources[id] != 0xDEADBEEF) {
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
 		audio_player_set_pause(audio_sources[id], 0);
 	}
 }
 
 void nativeSetSoundVolume(int id, float vol) {
 	//sceClibPrintf("nativeSetSoundVolume %s %f\n", sounds[id], vol);
-	if (audio_sources[id] != 0xDEADBEEF) {
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
 		audio_player_set_volume(audio_sources[id], vol);
 	}
 }
@@ -187,7 +187,7 @@ void nativeSetGroupVolume(int group_id, float vol) {
 		audio_player_change_bgm_volume(vol);
 #else
 		for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
-			if (audio_sources[i] != 0xDEADBEEF && audio_is_bgm[i]) {
+			if (audio_sources[i] != (void *)0xDEADBEEF && audio_is_bgm[i]) {
 				audio_player_set_volume(audio_sources[i], vol);
 			}
 		}
@@ -215,13 +215,68 @@ int nativeOpenBrowser(char *url) {
 }
 
 int nativeExit() {
-	sceKernelExitProcess(0);
+	return sceKernelExitProcess(0);
 }
+
+int nativeCreateEmitter(int id, int unk, int start) {
+	float vol = volumes[id < 24 ? 0 : 1];
+	char path[256];
+	sprintf(path, "%s/%s", audio_path, sounds[id]);
+	//sceClibPrintf("nativeCreateEmitter: %s %d %d %d %f\n", sounds[id], unk, start, id, vol);
+	
+	if (audio_sources[id] == (void *)0xDEADBEEF)	
+		audio_sources[id] = audio_player_play(path, 0, vol, 1);
+	return id;
+}
+
+void nativePlayEmitter(int id, int loop) {
+	//sceClibPrintf("nativePlayEmitter %s\n", sounds[id]);
+	if (audio_sources[id] != (void *)0xDEADBEEF)
+		audio_player_instance(audio_sources[id], loop, 3.0f);
+}
+
+int nativeIsEmitterPlaying(int id) {
+	//sceClibPrintf("nativeIsEmitterPlaying %s\n", sounds[id]);
+	if (audio_sources[id] != (void *)0xDEADBEEF)
+		return audio_player_is_playing(audio_sources[id]);
+	return 0;
+}
+
+void nativePauseEmitter(int id) {
+	//sceClibPrintf("nativePauseEmitter %s\n", sounds[id]);
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
+		audio_player_set_pause(audio_sources[id], 1);
+	}
+}
+
+void nativeResumeEmitter(int id) {
+	//sceClibPrintf("nativeResumeEmitter %s\n", sounds[id]);
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
+		audio_player_set_pause(audio_sources[id], 0);
+	}
+}
+
+void nativeSetEmitterVolume(int id, float vol) {
+	//sceClibPrintf("nativeSetSoundVolume %s %f\n", sounds[id], vol);
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
+		audio_player_set_volume(audio_sources[id], vol);
+	}
+}
+
+void nativeStopEmitter(int id) {
+	//sceClibPrintf("nativeStopEmitter %s\n", sounds[id]);
+	if (audio_sources[id] != (void *)0xDEADBEEF) {
+		audio_player_stop(audio_sources[id]);
+		audio_sources[id] = (void *)0xDEADBEEF;
+	}
+}
+
+int retminus1() { return -1; }
 
 void patch_game(void) {
 	audio_player_init();
 	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
-		audio_sources[i] = 0xDEADBEEF;
+		audio_sources[i] = (void *)0xDEADBEEF;
 	}
 	if (!is_xperia) {
 		strcpy(audio_path, "ux0:data/spiderman/gameloft/games/GloftSMHP/sound");
@@ -247,6 +302,17 @@ void patch_game(void) {
 	hook_addr(so_symbol(&spiderman_mod, "nativeGetGroupVolume"), (uintptr_t)&nativeGetGroupVolume);
 	hook_addr(so_symbol(&spiderman_mod, "nativeSetGroupVolume"), (uintptr_t)&nativeSetGroupVolume);
 	hook_addr(so_symbol(&spiderman_mod, "nativeOpenBrowser"), (uintptr_t)&nativeOpenBrowser);
+	
+	
+	hook_addr(so_symbol(&spiderman_mod, "nativeCreateEmitter"), (uintptr_t)&nativeCreateEmitter);
+	hook_addr(so_symbol(&spiderman_mod, "nativeIsEmitterPlaying"), (uintptr_t)&nativeIsEmitterPlaying);
+	hook_addr(so_symbol(&spiderman_mod, "nativePauseEmitter"), (uintptr_t)&nativePauseEmitter);
+	hook_addr(so_symbol(&spiderman_mod, "nativeResumeEmitter"), (uintptr_t)&nativeResumeEmitter);
+	hook_addr(so_symbol(&spiderman_mod, "nativePlayEmitter"), (uintptr_t)&nativePlayEmitter);
+	hook_addr(so_symbol(&spiderman_mod, "nativeSetEmitterVolume"), (uintptr_t)&nativeSetEmitterVolume);
+	hook_addr(so_symbol(&spiderman_mod, "nativeStopEmitter"), (uintptr_t)&nativeStopEmitter);
+	hook_addr(so_symbol(&spiderman_mod, "nativeFindFarthestEmitter"), (uintptr_t)&retminus1);
+	hook_addr(so_symbol(&spiderman_mod, "nativeIsEmitterAlive"), (uintptr_t)&nativeIsEmitterPlaying);
 	
 	if (is_xperia) {
 		hook_addr(so_symbol(&spiderman_mod, "_ZN6UIInfo7GetScrHEv"), (uintptr_t)&GetHeightOfScreen);
