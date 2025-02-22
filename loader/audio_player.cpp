@@ -165,9 +165,9 @@ void audio_player_stop_all_sounds() {
 
 void audio_player_set_pause_all_sounds(uint8_t val) {
 #ifdef USE_SDL_MIXER
-	audio_player_set_pause((void *)&bgm, 1);
+	audio_player_set_pause((void *)&bgm, val);
 	for (int i = 0; i < MAX_SOUNDS_NUM; i++) {
-		audio_player_set_pause((void *)&snd[i], 1);
+		audio_player_set_pause((void *)&snd[i], val);
 	}
 #else
 	val ? Mix_PauseMusicStreamAll() : Mix_ResumeMusicStreamAll();
