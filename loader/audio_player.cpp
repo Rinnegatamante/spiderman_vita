@@ -59,10 +59,10 @@ void audio_player_set_volume(void *m, float vol) {
 
 void *audio_player_play(char *path, uint8_t loop, float vol) {
 #ifdef USE_SDL_MIXER_EXT
-		Mix_Music *ret = Mix_LoadMUS(path);
-		Mix_VolumeMusicStream(ret, (int)(128.0f * vol));
-		Mix_PlayMusicStream(ret, loop ? -1 : 0);
-		return (void *)ret;
+	Mix_Music *ret = Mix_LoadMUS(path);
+	Mix_VolumeMusicStream(ret, (int)(128.0f * vol));
+	Mix_PlayMusicStream(ret, loop ? -1 : 0);
+	return (void *)ret;
 #else
 	if (loop) {
 		//sceClibPrintf("Loading %s in music slot %d\n", path, curr_snd_loop);
@@ -170,7 +170,7 @@ void audio_player_set_pause_all_sounds(uint8_t val) {
 		audio_player_set_pause((void *)&snd[i], 1);
 	}
 #else
-	Mix_PauseMusicStreamAll();
+	val ? Mix_PauseMusicStreamAll() : Mix_ResumeMusicStreamAll();
 #endif
 }
 

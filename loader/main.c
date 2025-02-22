@@ -186,11 +186,11 @@ void nativeSetGroupVolume(int group_id, float vol) {
 #if 0
 		audio_player_change_bgm_volume(vol);
 #else
-	for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
-		if (audio_sources[i] != 0xDEADBEEF && audio_is_bgm[i]) {
-			audio_player_set_volume(audio_sources[i], vol);
+		for (int i = 0; i < AUDIO_SOURCES_NUM; i++) {
+			if (audio_sources[i] != 0xDEADBEEF && audio_is_bgm[i]) {
+				audio_player_set_volume(audio_sources[i], vol);
+			}
 		}
-	}
 #endif
 	} else {
 		audio_player_change_sfx_volume(vol);
