@@ -9,6 +9,13 @@ By doing so, it's basically as if we emulate a minimalist Android environment in
 
 ## Changelog
 
+### v1.2
+
+- Implemented audio emitters. Now some missing sound effects will properly play.
+- Rewrote the audio backend to use SDL Mixer Extended in place of SoLoud. This should be more reliable and cause audio cuts with less frequency.
+- Replaced the bugged bootscreen with a handcrafted recreated one with proper scaling.
+- Restored specular/reflection effects.
+
 ### v1.1
 
 - Fixed wrong mapping for SELECT and START that were swapped.
@@ -91,7 +98,7 @@ Additionally, you'll need these libraries to be compiled as well with `-mfloat-a
 - [vitaGL](https://github.com/Rinnegatamante/vitaGL)
 
   - ````bash
-    make SOFTFP_ABI=1 NO_DEBUG=1 HAVE_CIRCULAR_VERTEX_POOL=2 USE_SCRATCH_MEM=1 PHYCONT_ON_DEMAND=1 install
+    make SOFTFP_ABI=1 NO_DEBUG=1 CIRCULAR_VERTEX_POOL=2 USE_SCRATCH_MEM=1 PHYCONT_ON_DEMAND=1 install
     ````
 
 After all these requirements are met, you can compile the loader with the following commands:
